@@ -8,6 +8,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,12 +32,14 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         super.onCreate(savedInstanceState);
         mContext=getContext();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         View view = inflater.inflate(R.layout.fragment_main, container);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
@@ -48,6 +51,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         super.onActivityCreated(savedInstanceState);
         // Initialize a Loader with id '1'. If the Loader with this id already
         // exists, then the LoaderManager will reuse the existing Loader.
@@ -56,16 +60,19 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public Loader<List<AppEntry>> onCreateLoader(int id, Bundle args) {
+        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         return new MainLoader(getActivity());
     }
 
     @Override
     public void onLoadFinished(Loader<List<AppEntry>> loader, List<AppEntry> data) {
+        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         mAdapter.swapData(data);
     }
 
     @Override
     public void onLoaderReset(Loader<List<AppEntry>> loader) {
+        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         mAdapter.swapData(null);
     }
 }
