@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Loaders</string>
+    <string name="activity_title">Installed Applications</string>
+    <string name="menu_configure_locale">Change language</string>
 </resources>

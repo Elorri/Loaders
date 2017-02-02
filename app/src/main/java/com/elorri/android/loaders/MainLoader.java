@@ -20,7 +20,7 @@ import java.util.List;
  * containing all installed applications on the device.
  */
 public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
-    private static final String TAG = "ADP_AppListLoader";
+    private static final String TAG = "App";
     private static final boolean DEBUG = true;
 
     final PackageManager mPackageManager;
@@ -49,7 +49,7 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
      */
     @Override
     public List<AppEntry> loadInBackground() {
-        if (DEBUG) Log.i(TAG, "+++ loadInBackground() called! +++");
+        if (DEBUG) Log.e(TAG, "+++ loadInBackground() called! +++");
 
         // Retrieve all installed applications.
         List<ApplicationInfo> apps = mPackageManager.getInstalledApplications(0);
@@ -83,8 +83,10 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
      */
     @Override
     public void deliverResult(List<AppEntry> apps) {
+        Log.e(TAG, Thread.currentThread().getStackTrace()[2]+"");
         if (isReset()) {
-            if (DEBUG) Log.w(TAG, "+++ Warning! An async query came in while the Loader was reset! +++");
+            if (DEBUG) Log.e(TAG, "+++ Warning! An async query came in while the Loader was " +
+                    "reset! +++");
             // The Loader has been reset; ignore the result and invalidate the data.
             // This can happen when the Loader is reset while an asynchronous query
             // is working in the background. That is, when the background thread
@@ -103,7 +105,7 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
         mApps = apps;
 
         if (isStarted()) {
-            if (DEBUG) Log.i(TAG, "+++ Delivering results to the LoaderManager for" +
+            if (DEBUG) Log.e(TAG, "+++ Delivering results to the LoaderManager for" +
                     " the ListFragment to display! +++");
             // If the Loader is in a started state, have the superclass deliver the
             // results to the client.
@@ -112,7 +114,7 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
 
         // Invalidate the old data as we don't need it any more.
         if (oldApps != null && oldApps != apps) {
-            if (DEBUG) Log.i(TAG, "+++ Releasing any old data associated with this Loader. +++");
+            if (DEBUG) Log.e(TAG, "+++ Releasing any old data associated with this Loader. +++");
             releaseResources(oldApps);
         }
     }
@@ -123,11 +125,12 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
 
     @Override
     protected void onStartLoading() {
-        if (DEBUG) Log.i(TAG, "+++ onStartLoading() called! +++");
+        Log.e(TAG, Thread.currentThread().getStackTrace()[2]+"");
+        if (DEBUG) Log.e(TAG, "+++ onStartLoading() called! +++");
 
         if (mApps != null) {
             // Deliver any previously loaded data immediately.
-            if (DEBUG) Log.i(TAG, "+++ Delivering previously loaded data to the client...");
+            if (DEBUG) Log.e(TAG, "+++ Delivering previously loaded data to the client...");
             deliverResult(mApps);
         }
 
@@ -145,18 +148,19 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
             // onContentChanged() on the Loader, which will cause the next call to
             // takeContentChanged() to return true. If this is ever the case (or if
             // the current data is null), we force a new load.
-            if (DEBUG) Log.i(TAG, "+++ A content change has been detected... so force load! +++");
+            if (DEBUG) Log.e(TAG, "+++ A content change has been detected... so force load! +++");
             forceLoad();
         } else if (mApps == null) {
             // If the current data is null... then we should make it non-null! :)
-            if (DEBUG) Log.i(TAG, "+++ The current data is data is null... so force load! +++");
+            if (DEBUG) Log.e(TAG, "+++ The current data is data is null... so force load! +++");
             forceLoad();
         }
     }
 
     @Override
     protected void onStopLoading() {
-        if (DEBUG) Log.i(TAG, "+++ onStopLoading() called! +++");
+        Log.e(TAG, Thread.currentThread().getStackTrace()[2]+"");
+        if (DEBUG) Log.e(TAG, "+++ onStopLoading() called! +++");
 
         // The Loader has been put in a stopped state, so we should attempt to
         // cancel the current load (if there is one).
@@ -169,7 +173,8 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
 
     @Override
     protected void onReset() {
-        if (DEBUG) Log.i(TAG, "+++ onReset() called! +++");
+        Log.e(TAG, Thread.currentThread().getStackTrace()[2]+"");
+        if (DEBUG) Log.e(TAG, "+++ onReset() called! +++");
 
         // Ensure the loader is stopped.
         onStopLoading();
@@ -194,7 +199,8 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
 
     @Override
     public void onCanceled(List<AppEntry> apps) {
-        if (DEBUG) Log.i(TAG, "+++ onCanceled() called! +++");
+        Log.e(TAG, Thread.currentThread().getStackTrace()[2]+"");
+        if (DEBUG) Log.e(TAG, "+++ onCanceled() called! +++");
 
         // Attempt to cancel the current asynchronous load.
         super.onCanceled(apps);
@@ -206,7 +212,8 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
 
     @Override
     public void forceLoad() {
-        if (DEBUG) Log.i(TAG, "+++ forceLoad() called! +++");
+        Log.e(TAG, Thread.currentThread().getStackTrace()[2]+"");
+        if (DEBUG) Log.e(TAG, "+++ forceLoad() called! +++");
         super.forceLoad();
     }
 

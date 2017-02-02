@@ -10,6 +10,11 @@ import java.io.File;
  * This class holds the per-item data in our {@link MainLoader}.
  */
 public class AppEntry {
+
+
+
+
+
     private final MainLoader mLoader;
     private final ApplicationInfo mInfo;
     private final File mApkFile;
@@ -27,32 +32,7 @@ public class AppEntry {
         return mInfo;
     }
 
-    public String getLabel() {
-        return mLabel;
-    }
 
-    public Drawable getIcon() {
-        if (mIcon == null) {
-            if (mApkFile.exists()) {
-                mIcon = mInfo.loadIcon(mLoader.mPackageManager);
-                return mIcon;
-            } else {
-                mMounted = false;
-            }
-        } else if (!mMounted) {
-            // If the app wasn't mounted but is now mounted, reload its icon.
-            if (mApkFile.exists()) {
-                mMounted = true;
-                mIcon = mInfo.loadIcon(mLoader.mPackageManager);
-                return mIcon;
-            }
-        } else {
-            return mIcon;
-        }
-
-        return mLoader.getContext().getResources()
-                .getDrawable(android.R.drawable.sym_def_app_icon);
-    }
 
     @Override
     public String toString() {
@@ -70,5 +50,40 @@ public class AppEntry {
                 mLabel = label != null ? label.toString() : mInfo.packageName;
             }
         }
+    }
+
+    public void setLabel(String label) {
+        this.mLabel = label;
+    }
+
+    public void setIcon(Drawable icon) {
+        this.mIcon = icon;
+    }
+
+    public String getLabel() {
+        return mLabel;
+    }
+
+    public Drawable getIcon() {
+        if (mIcon == null) {
+            if (mApkFile.exists()) {
+              //  mIcon = mInfo.loadIcon(mLoader.mPackageManager);
+                return mIcon;
+            } else {
+                mMounted = false;
+            }
+        } else if (!mMounted) {
+            // If the app wasn't mounted but is now mounted, reload its icon.
+            if (mApkFile.exists()) {
+                mMounted = true;
+               // mIcon = mInfo.loadIcon(mLoader.mPackageManager);
+                return mIcon;
+            }
+        } else {
+            return mIcon;
+        }
+
+        return mLoader.getContext().getResources()
+                .getDrawable(android.R.drawable.sym_def_app_icon);
     }
 }
