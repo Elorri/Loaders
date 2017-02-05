@@ -10,13 +10,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * An implementation of AsyncTaskLoader which loads a {@code List<AppEntry>}
+ * An implementation of AsyncTaskLoader which loads a {@code List<Label>}
  * containing all installed applications on the device.
  */
-public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
+public class MainLoader extends AsyncTaskLoader<List<Label>> {
 
 
-    private List<AppEntry> mApps;
+    private List<Label> mLabels;
 
     public MainLoader(Context context) {
         super(context);
@@ -30,17 +30,25 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
     }
 
     @Override
-    public void onCanceled(List<AppEntry> data) {
+    public void onCanceled(List<Label> data) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         super.onCanceled(data);
     }
 
     @Override
-    public List<AppEntry> loadInBackground() {
+    public List<Label> loadInBackground() {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        mApps=new ArrayList<>();
-        deliverResult(mApps);
-        return mApps ;
+        int count = 30;
+        mLabels = new ArrayList<>(count);
+        for (int i = 0; i < count; ++i) {
+            mLabels.add(new Label(String.valueOf(i)));
+        }
+       // mLabels.registerContentObserver(mObserver);
+
+        //deliverResult(mLabels); //should nt be called on B thread
+        //onContentChanged();
+        //forceLoad();
+        return mLabels;
     }
 
     @Override
@@ -68,7 +76,7 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
     }
 
     @Override
-    protected List<AppEntry> onLoadInBackground() {
+    protected List<Label> onLoadInBackground() {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         return super.onLoadInBackground();
     }
@@ -79,7 +87,7 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
     /*From Loader*/
 
     @Override
-    public void deliverResult(List<AppEntry> data) {
+    public void deliverResult(List<Label> data) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         super.deliverResult(data);
     }
@@ -91,13 +99,13 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
     }
 
     @Override
-    public void registerListener(int id, OnLoadCompleteListener<List<AppEntry>> listener) {
+    public void registerListener(int id, OnLoadCompleteListener<List<Label>> listener) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "listener " + listener);
         super.registerListener(id, listener);
     }
 
     @Override
-    public void unregisterListener(OnLoadCompleteListener<List<AppEntry>> listener) {
+    public void unregisterListener(OnLoadCompleteListener<List<Label>> listener) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "listener " + listener);
         super.unregisterListener(listener);
     }
@@ -125,14 +133,12 @@ public class MainLoader extends AsyncTaskLoader<List<AppEntry>> {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         super.onStartLoading();
 
-        onContentChanged();
-//        if (mApps != null) {
-//            deliverResult(mApps);
-//            return;
-//        }
-//        if (takeContentChanged()) { //onContentChanged call will change the value of this
-//            forceLoad();
-//        }
+        if (mLabels != null) {
+            deliverResult(mLabels);
+        }
+        if (takeContentChanged() || mLabels == null) {
+            forceLoad();
+        }
     }
 
     @Override

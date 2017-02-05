@@ -8,37 +8,33 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-public class MainAdapter extends RecyclerView.Adapter<ViewHolderAppEntry> {
-
+public class MainAdapter extends RecyclerView.Adapter<ViewHolderLabel> {
 
     private final Context mContext;
-    private final List<AppEntry> mList;
+    private final List<Label> mLabels;
 
-
-    public MainAdapter(Context context, List<AppEntry> list) {
+    public MainAdapter(Context context, List<Label> labels) {
         mContext = context;
-        mList=list;
+        mLabels =labels;
     }
 
-    public void swapData(List<AppEntry> data) {
-        mList.clear();
-        mList.addAll(data);
+    public void swapData(List<Label> data) {
+        mLabels.clear();
+        mLabels.addAll(data);
         notifyDataSetChanged();
     }
 
     @Override
-    public ViewHolderAppEntry onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ViewHolderLabel onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view = inflater.inflate(R.layout.list_item_icon_text, parent, false);
-        return new ViewHolderAppEntry(view);
+        View view = inflater.inflate(R.layout.item_label, parent, false);
+        return new ViewHolderLabel(view);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolderAppEntry viewHolderAppEntry, int position) {
-        AppEntry appEntry=mList.get(position);
-
-        viewHolderAppEntry.setIcon(appEntry.getIcon());
-        viewHolderAppEntry.setLabel(appEntry.getLabel());
+    public void onBindViewHolder(ViewHolderLabel viewHolderLabel, int position) {
+        Label label = mLabels.get(position);
+        viewHolderLabel.setLabel(label.getLabel());
     }
 
     @Override

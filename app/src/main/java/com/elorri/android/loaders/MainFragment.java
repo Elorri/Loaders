@@ -19,15 +19,13 @@ import java.util.List;
 /**
  * Created by Elorri on 01/02/2017.
  */
-public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<AppEntry>> {
+public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Label>> {
 
     // We use a custom ArrayAdapter to bind application info to the ListView.
     private MainAdapter mAdapter;
 
     // The Loader's id (this id is specific to the ListFragment's LoaderManager)
     private static final int LOADER_ID = 1;
-
-    private List<AppEntry> appEntries=new ArrayList<>();
     private Context mContext;
 
     @Override
@@ -44,7 +42,7 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
-        mAdapter = new MainAdapter(mContext, appEntries);
+        mAdapter = new MainAdapter(mContext, new ArrayList<Label>());
         recyclerView.setAdapter(mAdapter);
         return view;
     }
@@ -55,23 +53,25 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
         super.onActivityCreated(savedInstanceState);
         // Initialize a Loader with id '1'. If the Loader with this id already
         // exists, then the LoaderManager will reuse the existing Loader.
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getLoaderManager().initLoader(LOADER_ID, null, this); //Will trigger
+        // MainFragment.onCreateLoader and MainLoader.onStartLoading
     }
 
     @Override
-    public Loader<List<AppEntry>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<Label>> onCreateLoader(int id, Bundle args) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         return new MainLoader(getActivity());
+       // return new CursorLoader();
     }
 
     @Override
-    public void onLoadFinished(Loader<List<AppEntry>> loader, List<AppEntry> data) {
+    public void onLoadFinished(Loader<List<Label>> loader, List<Label> data) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         mAdapter.swapData(data);
     }
 
     @Override
-    public void onLoaderReset(Loader<List<AppEntry>> loader) {
+    public void onLoaderReset(Loader<List<Label>> loader) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         mAdapter.swapData(null);
     }
