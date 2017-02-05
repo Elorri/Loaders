@@ -2,221 +2,112 @@ package com.elorri.android.loaders;
 
 import android.content.Context;
 import android.support.v4.content.AsyncTaskLoader;
-import android.util.Log;
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import android.support.v4.os.CancellationSignal;
+import android.support.v4.os.OperationCanceledException;
 
 /**
  * An implementation of AsyncTaskLoader which loads a {@code List<Label>}
  * containing all installed applications on the device.
  */
-public class MainLoader extends AsyncTaskLoader<List<Label>> {
+public class MainLoader extends AsyncTaskLoader<LabelList> {
+    final ForceLoadContentObserver mObserver;
 
+    LabelList mLabelList;
+    CancellationSignal mCancellationSignal;
 
-    private List<Label> mLabels;
-
-    public MainLoader(Context context) {
-        super(context);
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-    }
-
+    /* Runs on a worker thread */
     @Override
-    public void setUpdateThrottle(long delayMS) {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.setUpdateThrottle(delayMS);
-    }
-
-    @Override
-    public void onCanceled(List<Label> data) {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.onCanceled(data);
-    }
-
-    @Override
-    public List<Label> loadInBackground() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        int count = 30;
-        mLabels = new ArrayList<>(count);
-        for (int i = 0; i < count; ++i) {
-            mLabels.add(new Label(String.valueOf(i)));
+    public LabelList loadInBackground() {
+        synchronized (this) {
+            if (isLoadInBackgroundCanceled()) {
+                throw new OperationCanceledException();
+            }
+            mCancellationSignal = new CancellationSignal();
         }
-       // mLabels.registerContentObserver(mObserver);
-
-        //deliverResult(mLabels); //should nt be called on B thread
-        //onContentChanged();
-        //forceLoad();
-        return mLabels;
+        try {
+            LabelList labelList = new LabelList();
+            labelList.registerContentObserver(mObserver);
+            return labelList;
+        } finally {
+            synchronized (this) {
+                mCancellationSignal = null;
+            }
+        }
     }
 
     @Override
     public void cancelLoadInBackground() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         super.cancelLoadInBackground();
+
+        synchronized (this) {
+            if (mCancellationSignal != null) {
+                mCancellationSignal.cancel();
+            }
+        }
     }
 
+    /* Runs on the UI thread */
     @Override
-    public boolean isLoadInBackgroundCanceled() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + super.isLoadInBackgroundCanceled());
-        return super.isLoadInBackgroundCanceled();
+    public void deliverResult(LabelList labelList) {
+        if (isReset()) {
+            // An async query came in while the loader is stopped
+            return;
+        }
+        LabelList oldLabelList = mLabelList;
+        mLabelList = labelList;
+
+        if (isStarted()) {
+            super.deliverResult(labelList);
+        }
     }
 
-    @Override
-    public void waitForLoader() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.waitForLoader();
+    public MainLoader(Context context) {
+        super(context);
+        mObserver = new ForceLoadContentObserver();
     }
 
-    @Override
-    public void dump(String prefix, FileDescriptor fd, PrintWriter writer, String[] args) {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.dump(prefix, fd, writer, args);
-    }
-
-    @Override
-    protected List<Label> onLoadInBackground() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        return super.onLoadInBackground();
-    }
-
-
-
-
-    /*From Loader*/
-
-    @Override
-    public void deliverResult(List<Label> data) {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.deliverResult(data);
-    }
-
-    @Override
-    public void deliverCancellation() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.deliverCancellation();
-    }
-
-    @Override
-    public void registerListener(int id, OnLoadCompleteListener<List<Label>> listener) {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "listener " + listener);
-        super.registerListener(id, listener);
-    }
-
-    @Override
-    public void unregisterListener(OnLoadCompleteListener<List<Label>> listener) {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "listener " + listener);
-        super.unregisterListener(listener);
-    }
-
-    @Override
-    public boolean isStarted() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + isStarted());
-        return super.isStarted();
-    }
-
-    @Override
-    public boolean isAbandoned() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + isAbandoned());
-        return super.isAbandoned();
-    }
-
-    @Override
-    public boolean isReset() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + isReset());
-        return super.isReset();
-    }
-
+    /**
+     * Starts an asynchronous load of the contacts list data. When the result is ready the callbacks
+     * will be called on the UI thread. If a previous load has been completed and is still valid
+     * the result may be passed to the callbacks immediately.
+     * <p/>
+     * Must be called from the UI thread
+     */
     @Override
     protected void onStartLoading() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.onStartLoading();
-
-        if (mLabels != null) {
-            deliverResult(mLabels);
+        if (mLabelList != null) {
+            deliverResult(mLabelList);
         }
-        if (takeContentChanged() || mLabels == null) {
+        if (takeContentChanged() || mLabelList == null) {
             forceLoad();
         }
     }
 
+    /**
+     * Must be called from the UI thread
+     */
     @Override
-    public boolean cancelLoad() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        return super.cancelLoad();
+    protected void onStopLoading() {
+        // Attempt to cancel the current load task if possible.
+        cancelLoad();
     }
 
     @Override
-    protected boolean onCancelLoad() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        return super.onCancelLoad();
-    }
-
-    @Override
-    public void forceLoad() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.forceLoad();
-    }
-
-    @Override
-    protected void onForceLoad() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.onForceLoad();
+    public void onCanceled(LabelList labelList) {
+       //close cursor do any relief work here
     }
 
     @Override
     protected void onReset() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         super.onReset();
-    }
 
-    @Override
-    public void stopLoading() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.stopLoading();
-    }
+        // Ensure the loader is stopped
+        onStopLoading();
 
-    @Override
-    protected void onStopLoading() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.onStopLoading();
-    }
-
-    @Override
-    public void abandon() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.abandon();
-    }
-
-    @Override
-    protected void onAbandon() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.onAbandon();
-    }
-
-    @Override
-    public boolean takeContentChanged() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        return super.takeContentChanged();
-    }
-
-    @Override
-    public void commitContentChanged() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.commitContentChanged();
-    }
-
-    @Override
-    public void rollbackContentChanged() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.rollbackContentChanged();
-    }
-
-    @Override
-    public void onContentChanged() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        super.onContentChanged();
+        if (mLabelList != null) {
+            //close cursor do any relief work here
+        }
+        mLabelList = null;
     }
 
 }

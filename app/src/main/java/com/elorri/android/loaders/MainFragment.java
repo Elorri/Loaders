@@ -14,12 +14,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by Elorri on 01/02/2017.
  */
-public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Label>> {
+public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<LabelList> {
 
     // We use a custom ArrayAdapter to bind application info to the ListView.
     private MainAdapter mAdapter;
@@ -58,20 +57,21 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
     }
 
     @Override
-    public Loader<List<Label>> onCreateLoader(int id, Bundle args) {
+    public Loader<LabelList> onCreateLoader(int id, Bundle args) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         return new MainLoader(getActivity());
        // return new CursorLoader();
     }
 
+
     @Override
-    public void onLoadFinished(Loader<List<Label>> loader, List<Label> data) {
+    public void onLoadFinished(Loader<LabelList> loader, LabelList data) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
-        mAdapter.swapData(data);
+        mAdapter.swapData(data.getLabels());
     }
 
     @Override
-    public void onLoaderReset(Loader<List<Label>> loader) {
+    public void onLoaderReset(Loader<LabelList> loader) {
         Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         mAdapter.swapData(null);
     }
