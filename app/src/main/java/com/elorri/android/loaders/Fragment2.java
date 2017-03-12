@@ -16,10 +16,7 @@ import android.widget.Button;
 
 import java.util.ArrayList;
 
-/**
- * Created by Elorri on 01/02/2017.
- */
-public class MainFragment extends Fragment implements LoaderManager.LoaderCallbacks<LabelList> {
+public class Fragment2 extends Fragment implements LoaderManager.LoaderCallbacks<LabelList> {
 
     // We use a custom ArrayAdapter to bind application info to the ListView.
     private MainAdapter mAdapter;
@@ -44,10 +41,10 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
             @Override
             public void onClick(View v) {
                 if (mLoader != null) {
-                    Log.e("App", Thread.currentThread().getStackTrace()[2] + "triggered");
+                    Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + "triggered");
                     mLoader.onContentChanged();
                 } else {
-                    getLoaderManager().initLoader(LOADER_ID, null, MainFragment.this);
+                    getLoaderManager().initLoader(LOADER_ID, null, Fragment2.this);
                 }
 
             }

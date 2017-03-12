@@ -15,10 +15,12 @@ public class MainLoader extends AsyncTaskLoader<LabelList> {
 
     LabelList mLabelList;
     CancellationSignal mCancellationSignal;
+    private boolean isLoadding;
 
     /* Runs on a worker thread */
     @Override
     public LabelList loadInBackground() {
+        Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + "triggered");
         synchronized (this) {
             if (isLoadInBackgroundCanceled()) {
                 throw new OperationCanceledException();
@@ -28,9 +30,11 @@ public class MainLoader extends AsyncTaskLoader<LabelList> {
         try {
             LabelList labelList = new LabelList();
             //labelList.registerContentObserver(mObserver);
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 5; i++) {
+                isLoadding = true;
                 longWork(1000L);
-                Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + i + " sec");
+                Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + i + " sec");
+                isLoadding = false;
             }
             return labelList;
         } finally {
@@ -64,7 +68,7 @@ public class MainLoader extends AsyncTaskLoader<LabelList> {
     public void deliverResult(LabelList labelList) {
         if (isReset()) {
             // An async query came in while the loader is stopped
-            Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
+            Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + "");
             return;
         }
         LabelList oldLabelList = mLabelList;
@@ -72,8 +76,9 @@ public class MainLoader extends AsyncTaskLoader<LabelList> {
 
         if (isStarted()) {
             super.deliverResult(labelList);
-            Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
+            Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + " isStarted ");
         }
+
     }
 
     public MainLoader(Context context) {
@@ -91,13 +96,13 @@ public class MainLoader extends AsyncTaskLoader<LabelList> {
      */
     @Override
     protected void onStartLoading() {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
+        Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + "");
         if (mLabelList != null) {
-            Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
+            Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + "");
             deliverResult(mLabelList);
         }
         if (takeContentChanged() || mLabelList == null) {
-            Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
+            Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + "");
             forceLoad();
         }
     }
@@ -114,6 +119,7 @@ public class MainLoader extends AsyncTaskLoader<LabelList> {
     @Override
     public void onCanceled(LabelList labelList) {
         //close cursor do any relief work here
+        Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + "triggered");
     }
 
     @Override
@@ -124,7 +130,7 @@ public class MainLoader extends AsyncTaskLoader<LabelList> {
         onStopLoading();
 
         if (mLabelList != null) {
-            Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
+            Log.e("App", Thread.currentThread().getStackTrace()[2] + "" + this + "");
             //close cursor do any relief work here
         }
         mLabelList = null;

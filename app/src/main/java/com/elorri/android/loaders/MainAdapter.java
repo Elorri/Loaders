@@ -19,6 +19,9 @@ public class MainAdapter extends RecyclerView.Adapter<ViewHolderLabel> {
     }
 
     public void swapData(List<Label> data) {
+        if(data==null){
+            return;
+        }
         mLabels.clear();
         mLabels.addAll(data);
         notifyDataSetChanged();
