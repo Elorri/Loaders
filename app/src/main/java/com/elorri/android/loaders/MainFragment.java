@@ -36,7 +36,6 @@ public class MainFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        Log.e("App", Thread.currentThread().getStackTrace()[2] + "");
         View view = inflater.inflate(R.layout.fragment_main, container);
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recyclerview);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);

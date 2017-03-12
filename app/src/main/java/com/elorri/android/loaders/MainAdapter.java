@@ -39,6 +39,6 @@ public class MainAdapter extends RecyclerView.Adapter<ViewHolderLabel> {
 
     @Override
     public int getItemCount() {
-        return 0;
+        return mLabels.size();
     }
 }

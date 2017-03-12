@@ -25,7 +25,7 @@ public class LabelList {
 
     public void registerContentObserver(ContentObserver observer) {
         mContentObservable.registerObserver(observer);
-        mSelfObserver = new SelfContentObserver(this);
+       // mSelfObserver = new SelfContentObserver(this);
     }
 
     public void unregisterContentObserver(ContentObserver observer) {
